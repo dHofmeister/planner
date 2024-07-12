@@ -1,6 +1,9 @@
 [package]
-name = "planner-1"
+name = "planner"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+log = "0"
+env_logger = "0"
+tokio = { version = "1", features = ["full"] }

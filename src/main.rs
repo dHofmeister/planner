@@ -1,6 +1,10 @@
 #[allow(unused_imports)]
-use planner_1::config::{GRID_L, GRID_M, GRID_S};
-use planner_1
-fn main() {
-    println!("{GRID_S}");
+use planner::config::{GRID_L, GRID_M, GRID_S};
+use planner::utils::load_grid;
+
+#[tokio::main]
+async fn main() {
+    env_logger::init();
+    log::info!("starting up");
+    let _grid = load_grid(GRID_S).await;
 }
