@@ -1,4 +1,5 @@
 use std::fmt;
+use std::hash::{Hash, Hasher};
 
 pub struct Path {
     pub steps: Vec<(usize, usize)>,
@@ -15,12 +16,27 @@ impl fmt::Display for Path {
     }
 }
 
+#[derive(Clone)]
 pub struct Node {
     pub row: usize,
     pub col: usize,
     pub value: u32,
     pub parent: Option<(usize, usize)>,
 }
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Hash for Node {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
+    }
+}
+
+impl Eq for Node {}
 
 pub struct Grid {
     pub data: Vec<u8>,

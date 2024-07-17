@@ -90,7 +90,7 @@ impl Solver for BFS {
             total_cost: max_value,
         };
 
-        let mut current = (0, 2);
+        let mut current = max_end;
         while let Some(node) = nodes.get(&current) {
             path.steps.push(current);
             if let Some(parent) = node.parent {
