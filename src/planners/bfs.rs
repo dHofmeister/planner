@@ -1,16 +1,29 @@
-use crate::models::Grid;
 use crate::traits::Solver;
-use std::collections::VecDeque;
+use crate::types::Node;
+use crate::types::{Grid, Path};
+use std::collections::{HashMap, VecDeque};
 
-struct BFS {}
+pub struct BFS {}
 
 impl Solver for BFS {
-    async fn solve(grid: &Grid, start: (usize, usize)) -> Vec<u8> {
+    fn solve(grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = VecDeque::new();
         let mut visited = vec![false; grid.size * grid.size];
+        let mut nodes = HashMap::new();
+        let mut max_value = 0;
+        let mut max_end = start;
 
-        queue.push_back((start.0, start.1, grid.value_at(start.0, start.1)));
+        queue.push_back(start);
         visited[start.0 * grid.size + start.1] = true;
+        nodes.insert(
+            start,
+            Node {
+                row: start.0,
+                col: start.1,
+                value: grid.value_at(start.0, start.1) as u32,
+                parent: None,
+            },
+        );
 
         let directions: &[(i32, i32)] = &[
             (1, 0),
@@ -23,11 +36,17 @@ impl Solver for BFS {
             (1, -1),
         ];
 
-        while let Some((row, col, value)) = queue.pop_front() {
-            let current_value: u32 = path.iter().map(|&x| x as u32).sum();
+        while let Some((row, col)) = queue.pop_front() {
+            let current_value = nodes[&(row, col)].value;
+
+            if current_value > max_value {
+                max_value = current_value;
+                max_end = (row, col);
+            }
+
             for (dx, dy) in directions {
-                let new_row = row as i32 + dx;
-                let new_col = col as i32 + dy;
+                let new_row = row as i32 + *dx;
+                let new_col = col as i32 + *dy;
 
                 if new_row >= 0
                     && new_row < grid.size as i32
@@ -40,12 +59,54 @@ impl Solver for BFS {
 
                     if !visited[index] {
                         visited[index] = true;
-                        let new_value = value + grid.value_at(new_row, new_col);
-                        queue.push_back((new_row, new_col, new_value));
+                        let new_value = current_value + grid.value_at(new_row, new_col) as u32;
+                        nodes.insert(
+                            (new_row, new_col),
+                            Node {
+                                row: new_row,
+                                col: new_col,
+                                value: new_value,
+                                parent: Some((row, col)),
+                            },
+                        );
+                        queue.push_back((new_row, new_col));
                     }
                 }
             }
         }
-        vec![1]
+
+        log::debug!(
+            "Visited: {}/{}",
+            visited.iter().filter(|&&x| x).count(),
+            visited.len()
+        );
+
+        log::debug!("Nodes in Hashmap: {}", nodes.len());
+        log::debug!("Size of grid: {} x {}", grid.size, grid.size);
+        log::debug!("Max value found: {}", max_value.clone());
+
+        let mut path = Path {
+            steps: vec![],
+            total_cost: max_value,
+        };
+
+        let mut current = (0, 2);
+        while let Some(node) = nodes.get(&current) {
+            path.steps.push(current);
+            if let Some(parent) = node.parent {
+                current = parent;
+            } else {
+                break;
+            }
+        }
+
+        if path.steps.is_empty() {
+            return None;
+        }
+
+        path.steps.reverse();
+        log::debug!("Path length: {}", path.steps.len());
+
+        Some(path)
     }
 }
