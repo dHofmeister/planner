@@ -7,7 +7,7 @@ use std::collections::HashMap;
 pub struct Dijkstra {}
 
 impl Solver for Dijkstra {
-    fn solve(grid: &Grid, start: (usize, usize)) -> Option<Path> {
+    fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = PriorityQueue::new();
         let node = Node {
             row: start.0,

@@ -8,10 +8,10 @@ async fn main() {
     // INFO: Setup
     env_logger::init();
     log::info!("starting up");
-    let grid = load_grid(GRID_TEST_HORIZONTAL).await;
+    let grid = load_grid(GRID_S).await;
     let start = (0, 0);
-
-    let path = planners::BFS::solve(&grid, start);
+    let planner = planners::RayCasting { len: 5, rays: 8 };
+    let path = planner.solve(&grid, start);
 
     match path {
         Some(path) => plot_path(&grid, &path),

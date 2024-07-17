@@ -6,7 +6,7 @@ use std::collections::{HashMap, VecDeque};
 pub struct BFS {}
 
 impl Solver for BFS {
-    fn solve(grid: &Grid, start: (usize, usize)) -> Option<Path> {
+    fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = VecDeque::new();
         let mut visited = vec![false; grid.size * grid.size];
         let mut nodes = HashMap::new();
