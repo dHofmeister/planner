@@ -11,7 +11,7 @@ impl Grid {
         Grid { data, size }
     }
 
-    pub fn get(&self, row: usize, col: usize) -> u8 {
+    pub fn value_at(&self, row: usize, col: usize) -> u8 {
         self.data[row * self.size + col]
     }
 }
@@ -21,7 +21,7 @@ impl fmt::Display for Grid {
         writeln!(f)?;
         for i in 0..self.size {
             for j in 0..self.size {
-                write!(f, "{} ", self.get(i, j))?;
+                write!(f, "{} ", self.value_at(i, j))?;
             }
             writeln!(f)?;
         }
