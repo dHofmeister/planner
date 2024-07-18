@@ -1,5 +1,7 @@
+use anyhow::Result;
+
 use crate::types::Grid;
-pub async fn load_grid(grid_str: &str) -> Grid {
+pub async fn load_grid(grid_str: &str) -> Result<Grid> {
     let grid_vec: Vec<u8> = grid_str
         .split_whitespace()
         .filter_map(|s| s.parse().ok())
@@ -9,5 +11,5 @@ pub async fn load_grid(grid_str: &str) -> Grid {
 
     log::debug!("{}", grid);
 
-    grid
+    Ok(grid)
 }

@@ -1,8 +1,9 @@
+use std::collections::VecDeque;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
 pub struct Path {
-    pub steps: Vec<(usize, usize)>,
+    pub steps: VecDeque<(usize, usize)>,
     pub total_cost: u32,
 }
 
@@ -38,6 +39,7 @@ impl Hash for Node {
 
 impl Eq for Node {}
 
+#[derive(Clone)]
 pub struct Grid {
     pub data: Vec<u8>,
     pub size: usize,

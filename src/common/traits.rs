@@ -7,5 +7,5 @@ pub trait Solver {
 }
 
 pub trait Simulator {
-    fn sim(grid: &Grid, path: &Path) -> Result<(Grid, Path)>;
+    fn solve(&self, grid: &Grid, path: &Path) -> Result<(Grid, (usize, usize))>;
 }

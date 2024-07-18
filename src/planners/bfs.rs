@@ -86,13 +86,13 @@ impl Solver for BFS {
         log::debug!("Max value found: {}", max_value.clone());
 
         let mut path = Path {
-            steps: vec![],
+            steps: VecDeque::new(),
             total_cost: max_value,
         };
 
         let mut current = max_end;
         while let Some(node) = nodes.get(&current) {
-            path.steps.push(current);
+            path.steps.push_back(current);
             if let Some(parent) = node.parent {
                 current = parent;
             } else {
@@ -104,7 +104,7 @@ impl Solver for BFS {
             return None;
         }
 
-        path.steps.reverse();
+        path.steps.make_contiguous().reverse();
         log::debug!("Path length: {}", path.steps.len());
 
         Some(path)

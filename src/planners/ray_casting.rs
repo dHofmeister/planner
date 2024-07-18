@@ -45,7 +45,7 @@ impl Solver for RayCasting {
                 line_value += grid.value_at(line_point.0 as usize, line_point.1 as usize) as f32;
             }
 
-            let line_avg_value = line_value as f32 / line_points.len() as f32;
+            let line_avg_value = line_value as f32 / (line_points.len() as f32 + 2.);
 
             let converted_line_points: Vec<(usize, usize)> = line_points
                 .into_iter()
@@ -54,7 +54,7 @@ impl Solver for RayCasting {
             if line_avg_value > max_avg_value {
                 max_avg_value = line_avg_value;
                 best_path = Some(Path {
-                    steps: converted_line_points,
+                    steps: converted_line_points.into(),
                     total_cost: f32::round(line_value) as u32,
                 });
             }
