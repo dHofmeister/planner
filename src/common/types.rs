@@ -1,7 +1,10 @@
+use crate::config::grids::*;
+use anyhow::Result;
 use std::collections::VecDeque;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+// INFO: Path
 pub struct Path {
     pub steps: VecDeque<(usize, usize)>,
     pub total_cost: u32,
@@ -17,6 +20,7 @@ impl fmt::Display for Path {
     }
 }
 
+// INFO: Node
 #[derive(Clone)]
 pub struct Node {
     pub row: usize,
@@ -39,6 +43,7 @@ impl Hash for Node {
 
 impl Eq for Node {}
 
+// INFO: Grid
 #[derive(Clone)]
 pub struct Grid {
     pub data: Vec<u8>,
@@ -53,6 +58,31 @@ impl Grid {
 
     pub fn value_at(&self, row: usize, col: usize) -> u8 {
         self.data[row * self.size + col]
+    }
+
+    pub fn load(grid_name: &str) -> Result<Self> {
+        let grid_file = match grid_name {
+            "GRID_S" => GRID_S,
+            "GRID_M" => GRID_M,
+            "GRID_L" => GRID_L,
+            "GRID_TEST_SINGLE" => GRID_TEST_SINGLE,
+            "GRID_TEST_LINE" => GRID_TEST_LINE,
+            "GRID_TEST_HORIZONTAL" => GRID_TEST_HORIZONTAL,
+            "GRID_TEST_VERTICAL" => GRID_TEST_VERTICAL,
+            "GRID_TEST_DIAGONAL" => GRID_TEST_DIAGONAL,
+            _ => return Err(anyhow::anyhow!("Invalid grid name: {}", grid_name)),
+        };
+
+        let grid_vec: Vec<u8> = grid_file
+            .split_whitespace()
+            .filter_map(|s| s.parse().ok())
+            .collect();
+
+        let grid = Self::new(grid_vec);
+
+        log::debug!("Grid loaded as: \n{}", grid);
+
+        Ok(grid)
     }
 }
 

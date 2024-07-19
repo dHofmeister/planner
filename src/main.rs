@@ -1,48 +1,73 @@
-#[allow(unused_imports)]
-use planner::config::grids::*;
+use log::LevelFilter;
+use planner::parsers::Cli;
 use planner::planners;
 use planner::simulators;
 use planner::traits::{Simulator, Solver};
 use planner::types::{Grid, Path};
-use planner::utils::{load_grid, plot_path};
+use planner::utils::{plot_path, Deadline};
+
+#[allow(unused_imports)]
+use planner::config::grids::*;
 
 use anyhow::Result;
+use clap::Parser;
 use std::thread;
 use std::time::Duration;
 
 #[tokio::main]
 async fn main() {
-    // INFO: Setup
+    // INFO: Initialize
     env_logger::init();
     log::info!("starting up");
-    let mut current_location = (0, 0);
+    let cli = Cli::parse();
 
-    let mut grid: Result<Grid> = load_grid(GRID_S).await;
-    let mut path: Option<Path> = None;
+    // INFO: Starting Configuration
+    let mut current_location = (cli.pos_x, cli.pos_y);
+    let mut grid: Result<Grid> = Grid::load(&cli.grid);
+    let path: Option<Path> = None;
+    let max_steps: usize = cli.time_steps;
 
-    let planner = planners::RayCasting { len: 7, rays: 8 };
+    let planner = planners::RayCasting {
+        len: cli.size,
+        rays: 8,
+    };
     let simulator = simulators::Incremental { step_size: 1 };
 
     // INFO: Run
+    let mut current_step = 0;
+    let mut deadline = Deadline::new(cli.max_duration as f32);
     while let Ok(current_grid) = grid.as_ref() {
-        path = planner.solve(&current_grid, current_location);
-
-        if let Some(current_path) = path.as_ref() {
-            match simulator.solve(&current_grid, &current_path) {
+        current_step += 1;
+        match planner.solve(&current_grid, current_location) {
+            Some(path) => match simulator.solve(&current_grid, &path) {
                 Ok((new_grid, new_location)) => {
                     grid = Ok(new_grid);
                     current_location = new_location;
 
-                    thread::sleep(Duration::from_millis(100));
-
-                    plot_path(&grid.as_ref().unwrap(), current_path);
+                    if log::max_level() <= LevelFilter::Debug {
+                        plot_path(&grid.as_ref().unwrap(), &path);
+                        thread::sleep(Duration::from_millis(10));
+                    }
                 }
                 Err(e) => {
                     log::error!("Simulation error: {:?}", e);
                     break;
                 }
+            },
+            _ => {
+                log::debug!("Path planning finished");
+                break;
             }
-        } else {
+        }
+
+        if current_step == max_steps {
+            log::debug!("Max time steps reached");
+            break;
+        }
+
+        deadline.tick();
+        if deadline.will_exceed_deadline() {
+            log::debug!("Terminating due to deadline");
             break;
         }
     }

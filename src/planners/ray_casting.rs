@@ -1,21 +1,20 @@
 use crate::traits::Solver;
 use crate::types::{Grid, Path};
 use bresenham::Bresenham;
-use std::collections::VecDeque;
 use std::f32;
 use std::f32::consts;
 
 pub struct RayCasting {
-    pub len: i32,
-    pub rays: i32,
+    pub len: usize,
+    pub rays: usize,
 }
 
 impl Solver for RayCasting {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
-        let d_angle = 2.0 * consts::PI / self.rays as f32;
-        let mut angles = Vec::with_capacity(self.rays as usize);
+        let d_angle: f32 = 2.0 * consts::PI / self.rays as f32;
+        let mut angles = Vec::<f32>::with_capacity(self.rays);
+        let mut goals = Vec::<(isize, isize)>::with_capacity(self.rays);
 
-        let mut goals = VecDeque::<(isize, isize)>::new();
         let mut max_avg_value: f32 = 0.0;
         let mut best_path: Option<Path> = None;
 
@@ -30,8 +29,10 @@ impl Solver for RayCasting {
             let gx = f32::round(dx) as isize;
             let gy = f32::round(dy) as isize;
 
-            goals.push_back((gx, gy));
+            goals.push((start.0 as isize + gx, start.1 as isize + gy));
         }
+
+        log::debug!("Goals: {:?}", goals);
 
         for goal in goals {
             let mut line_points =
@@ -51,7 +52,9 @@ impl Solver for RayCasting {
                 .into_iter()
                 .map(|(x, y)| (x as usize, y as usize))
                 .collect();
-            if line_avg_value > max_avg_value {
+
+            // INFO: Save best
+            if line_avg_value > max_avg_value && converted_line_points.len() > 1 {
                 max_avg_value = line_avg_value;
                 best_path = Some(Path {
                     steps: converted_line_points.into(),

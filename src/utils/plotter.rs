@@ -7,7 +7,9 @@ pub fn plot_path(grid: &Grid, path: &Path) {
     for i in 0..grid.size {
         for j in 0..grid.size {
             let value = grid.value_at(i, j);
-            if path.steps.contains(&(i, j)) {
+            if !path.steps.is_empty() && path.steps.front() == Some(&(i, j)) {
+                output.push_str(&format!("[ X]"));
+            } else if path.steps.contains(&(i, j)) {
                 output.push_str(&format!("[{:2}]", value));
             } else {
                 output.push_str(&format!(" {:2} ", value));
