@@ -14,6 +14,13 @@ use std::collections::VecDeque;
 use std::thread;
 use std::time::Duration;
 
+// TODO: List of todos:
+// --swarm
+// --example
+// --docs
+// --bench
+// --test
+
 use log::LevelFilter;
 #[tokio::main]
 async fn main() {

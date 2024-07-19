@@ -76,7 +76,7 @@ impl Grid {
 
         let grid_vec: Vec<u8> = grid_file
             .split_whitespace()
-            .filter_map(|s| s.parse::<u8>().ok().map(|num| num.saturating_mul(10)))
+            .filter_map(|s| s.parse::<u8>().ok().map(|num| num.saturating_mul(1)))
             .collect();
 
         let grid = Self::new(grid_vec);
