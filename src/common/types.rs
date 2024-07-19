@@ -5,6 +5,7 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 
 // INFO: Path
+#[derive(Clone)]
 pub struct Path {
     pub steps: VecDeque<(usize, usize)>,
     pub total_cost: u32,

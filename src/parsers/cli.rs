@@ -10,7 +10,7 @@ use clap::Parser;
 )]
 pub struct Cli {
     /// Grid size
-    #[arg(short = 'n', long, default_value = "11")]
+    #[arg(short = 'n', long, default_value = "5")]
     pub size: usize,
 
     /// Discrete time steps
