@@ -35,6 +35,6 @@ pub fn plot_path(grid: &Grid, path: &Path) {
         output.push('\n');
     }
 
-    output.push_str(&format!("Final Score {:2}", path.total_cost));
+    output.push_str(&format!("Path Score {:2}", path.total_cost));
     log::info!("Path on grid: {}", output);
 }

@@ -20,7 +20,7 @@ impl Solver for BFS {
             Node {
                 row: start.0,
                 col: start.1,
-                value: grid.value_at(start.0, start.1) as u32,
+                value: grid.value_at(start.0, start.1) as usize,
                 parent: None,
             },
         );
@@ -59,7 +59,7 @@ impl Solver for BFS {
 
                     if !visited[index] {
                         visited[index] = true;
-                        let new_value = current_value + grid.value_at(new_row, new_col) as u32;
+                        let new_value = current_value + grid.value_at(new_row, new_col) as usize;
                         nodes.insert(
                             (new_row, new_col),
                             Node {

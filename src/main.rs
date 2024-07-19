@@ -30,7 +30,13 @@ async fn main() {
         len: cli.size,
         rays: 8,
     };
-    let simulator = simulators::Incremental { step_size: 1 };
+    let simulator = simulators::Incremental {
+        start_grid: grid
+            .as_ref()
+            .map(|g| g.clone())
+            .expect("Failed to load grid into simulator"),
+        increment_step: 1,
+    };
 
     // INFO: Prepare
     let max_steps: usize = cli.time_steps;
@@ -47,7 +53,8 @@ async fn main() {
         match planner.solve(&current_grid, current_location) {
             Some(path) => {
                 path_trace.steps.push_back(path.steps[0].clone());
-                path_trace.total_cost = path.total_cost;
+                path_trace.total_cost +=
+                    current_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
 
                 match simulator.solve(&current_grid, &path) {
                     Ok((new_grid, new_location)) => {

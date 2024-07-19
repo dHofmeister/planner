@@ -58,7 +58,7 @@ impl Solver for RayCasting {
                 max_avg_value = line_avg_value;
                 best_path = Some(Path {
                     steps: converted_line_points.into(),
-                    total_cost: f32::round(line_value) as u32,
+                    total_cost: f32::round(line_value) as usize,
                 });
             }
         }

@@ -8,7 +8,7 @@ use std::hash::{Hash, Hasher};
 #[derive(Clone)]
 pub struct Path {
     pub steps: VecDeque<(usize, usize)>,
-    pub total_cost: u32,
+    pub total_cost: usize,
 }
 
 impl fmt::Display for Path {
@@ -26,7 +26,7 @@ impl fmt::Display for Path {
 pub struct Node {
     pub row: usize,
     pub col: usize,
-    pub value: u32,
+    pub value: usize,
     pub parent: Option<(usize, usize)>,
 }
 
@@ -76,7 +76,7 @@ impl Grid {
 
         let grid_vec: Vec<u8> = grid_file
             .split_whitespace()
-            .filter_map(|s| s.parse().ok())
+            .filter_map(|s| s.parse::<u8>().ok().map(|num| num.saturating_mul(10)))
             .collect();
 
         let grid = Self::new(grid_vec);

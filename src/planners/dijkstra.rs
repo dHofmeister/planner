@@ -12,7 +12,7 @@ impl Solver for Dijkstra {
         let node = Node {
             row: start.0,
             col: start.1,
-            value: grid.value_at(start.0, start.1) as u32,
+            value: grid.value_at(start.0, start.1) as usize,
             parent: None,
         };
 
@@ -46,7 +46,7 @@ impl Solver for Dijkstra {
                         row: new_row as usize,
                         col: new_col as usize,
                         value: current_value
-                            + grid.value_at(new_row as usize, new_col as usize) as u32,
+                            + grid.value_at(new_row as usize, new_col as usize) as usize,
                         parent: Some((current_node.row, current_node.col)),
                     };
                 }
