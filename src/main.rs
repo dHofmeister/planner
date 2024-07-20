@@ -30,7 +30,7 @@ async fn main() {
     let cli = Cli::parse();
 
     // INFO: Starting Configuration
-    let mut current_location = (cli.pos_x, cli.pos_y);
+    let mut positions: Vec<(usize, usize)> = cli.pos_x.into_iter().zip(cli.pos_y).collect();
     let mut grid: Result<Grid> = Grid::load(&cli.grid);
 
     let planner = planners::RayCasting {
@@ -42,7 +42,7 @@ async fn main() {
             .as_ref()
             .map(|g| g.clone())
             .expect("Failed to load grid into simulator"),
-        increment_step: 1,
+        increment_step: 0,
     };
 
     // INFO: Prepare
@@ -55,45 +55,60 @@ async fn main() {
     // INFO: Run
     let mut current_step = 0;
     let mut deadline = Deadline::new(cli.max_duration as f32);
-    while let Ok(current_grid) = grid.as_ref() {
+    while let Ok(current_grid) = grid.as_mut() {
         current_step += 1;
-        match planner.solve(&current_grid, current_location) {
-            Some(path) => {
-                path_trace.steps.push_back(path.steps[0].clone());
-                path_trace.total_cost +=
-                    current_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
 
-                match simulator.solve(&current_grid, &path) {
-                    Ok((new_grid, new_location)) => {
-                        grid = Ok(new_grid);
-                        current_location = new_location;
+        // INFO: Prepare Grid
+        for pos in &positions {
+            current_grid.saturated_subtract_at(pos.0, pos.1, 1, 3);
+        }
 
-                        if log::max_level() >= LevelFilter::Debug {
-                            plot_path(&grid.as_ref().unwrap(), &path);
-                            thread::sleep(Duration::from_millis(100));
+        // INFO: Define per-drone configuration
+        for mut private_location in &positions {
+            let mut private_grid = current_grid.clone();
+            private_grid.saturated_add_at(private_location.0, private_location.1, 1, 3);
+
+            // INFO: Solve Action
+            match planner.solve(&private_grid, *private_location) {
+                Some(path) => {
+                    path_trace.steps.push_back(path.steps[0].clone());
+                    path_trace.total_cost +=
+                        current_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
+
+                    // INFO: Solve Result
+                    match simulator.solve(&private_grid, &path) {
+                        Ok((new_grid, new_location)) => {
+                            // TODO: Think of grid mapping
+                            grid = Ok(new_grid);
+                            private_location = &new_location;
+
+                            if log::max_level() >= LevelFilter::Debug {
+                                plot_path(&grid.as_ref().unwrap(), &path);
+                                thread::sleep(Duration::from_millis(100));
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("Simulation error: {:?}", e);
+                            break;
                         }
                     }
-                    Err(e) => {
-                        log::error!("Simulation error: {:?}", e);
-                        break;
-                    }
+                }
+                _ => {
+                    log::debug!("Path planning finished");
+                    break;
                 }
             }
-            _ => {
-                log::debug!("Path planning finished");
+
+            if current_step == max_steps {
+                log::info!("Max time steps reached");
                 break;
             }
-        }
 
-        if current_step == max_steps {
-            log::debug!("Max time steps reached");
-            break;
-        }
-
-        deadline.tick();
-        if deadline.will_exceed_deadline() {
-            log::debug!("Terminating due to deadline");
-            break;
+            deadline.tick();
+            if deadline.will_exceed_deadline() {
+                log::info!("Terminating due to deadline");
+                break;
+            }
         }
     }
 

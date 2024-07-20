@@ -61,6 +61,40 @@ impl Grid {
         self.data[row * self.size + col]
     }
 
+    pub fn saturated_subtract_at(&mut self, row: usize, col: usize, range: usize, amount: usize) {
+        let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
+        for r in start_row..end_row {
+            for c in start_col..end_col {
+                let index = r * self.size + c;
+                self.data[index] = self.data[index].saturating_sub(amount as u8);
+            }
+        }
+    }
+
+    pub fn saturated_add_at(&mut self, row: usize, col: usize, range: usize, amount: usize) {
+        let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
+        for r in start_row..end_row {
+            for c in start_col..end_col {
+                let index = r * self.size + c;
+                self.data[index] = self.data[index].saturating_add(amount as u8);
+            }
+        }
+    }
+
+    fn get_start_end_row_col(
+        &self,
+        row: usize,
+        col: usize,
+        range: usize,
+    ) -> (usize, usize, usize, usize) {
+        let start_row = row.saturating_sub(range);
+        let end_row = (row + range + 1).min(self.size);
+        let start_col = col.saturating_sub(range);
+        let end_col = (col + range + 1).min(self.size);
+
+        (start_row, end_row, start_col, end_col)
+    }
+
     pub fn load(grid_name: &str) -> Result<Self> {
         let grid_file = match grid_name {
             "GRID_S" => GRID_S,

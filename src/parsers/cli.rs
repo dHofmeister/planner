@@ -21,13 +21,12 @@ pub struct Cli {
     #[arg(short = 'T', long, default_value = "100")]
     pub max_duration: usize,
 
-    /// Starting position x
-    #[arg(short = 'x', long, default_value = "0")]
-    pub pos_x: usize,
+    #[arg(short = 'x', long, value_parser = parse_position, number_of_values = 1, action = clap::ArgAction::Append)]
+    pub pos_x: Vec<usize>,
 
-    /// Starting position y
-    #[arg(short = 'y', long, default_value = "0")]
-    pub pos_y: usize,
+    /// Starting positions y
+    #[arg(short = 'y', long, value_parser = parse_position, number_of_values = 1, action = clap::ArgAction::Append)]
+    pub pos_y: Vec<usize>,
 
     /// Source grid
     #[arg(short = 'g', long, default_value = "GRID_S")]
