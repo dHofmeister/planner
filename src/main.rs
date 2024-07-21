@@ -42,7 +42,7 @@ async fn main() {
             .as_ref()
             .map(|g| g.clone())
             .expect("Failed to load grid into simulator"),
-        increment_step: 0,
+        increment_step: 1,
     };
 
     // INFO: Prepare
@@ -90,8 +90,10 @@ async fn main() {
                         global_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
 
                     // INFO: Simulate Result
-                    match simulator.solve(&private_grid, &path) {
+                    match simulator.solve(&reference_grid, &path) {
                         Ok((new_grid, new_location)) => {
+                            // TODO: new grid contains the drop
+                            // Grid management needs to improve
                             grid = Ok(new_grid);
                             *private_location = new_location;
                         }
@@ -120,7 +122,7 @@ async fn main() {
         }
 
         if log::max_level() >= LevelFilter::Debug {
-            plot_paths(&grid.as_ref().unwrap(), &paths);
+            plot_paths(&reference_grid, &paths);
             thread::sleep(Duration::from_millis(100));
         }
     }
