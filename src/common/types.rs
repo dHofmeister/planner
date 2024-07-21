@@ -115,13 +115,21 @@ impl Grid {
 
         let grid = Self::new(grid_vec);
 
-        log::debug!("Grid loaded as: \n{}", grid);
-
         Ok(grid)
+    }
+
+    pub fn max(&mut self, row: usize, col: usize, range: usize, source_grid: &Grid) {
+        let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
+        for r in start_row..end_row {
+            for c in start_col..end_col {
+                let index = r * self.size + c;
+                self.data[index] = self.data[index].max(source_grid.data[index] as u8);
+            }
+        }
     }
 }
 
-impl fmt::Display for Grid {
+impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f)?;
         for i in 0..self.size {
