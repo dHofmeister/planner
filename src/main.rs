@@ -3,7 +3,7 @@ use planner::planners;
 use planner::simulators;
 use planner::traits::{Simulator, Solver};
 use planner::types::{Grid, Path};
-use planner::utils::{plot_path, Deadline};
+use planner::utils::{plot_paths, Deadline};
 
 #[allow(unused_imports)]
 use planner::config::grids::*;
@@ -32,7 +32,6 @@ async fn main() {
     // INFO: Starting Configuration
     let mut positions: Vec<(usize, usize)> = cli.pos_x.into_iter().zip(cli.pos_y).collect();
     let mut grid: Result<Grid> = Grid::load(&cli.grid);
-    let mut paths = Vec::<Path>::new();
 
     let planner = planners::RayCasting {
         len: cli.size,
@@ -47,6 +46,7 @@ async fn main() {
     };
 
     // INFO: Prepare
+    let mut paths: Vec<Vec<Path>> = vec![Vec::new(); 5];
     let max_steps: usize = cli.time_steps;
     let mut path_trace = Path {
         steps: VecDeque::<(usize, usize)>::new(),
@@ -75,21 +75,21 @@ async fn main() {
         log::debug!("Positions: {:?}", positions);
 
         // INFO: Define per-drone configuration
-        for private_location in &mut positions {
+        for (index, private_location) in positions.iter_mut().enumerate() {
             let mut private_grid = global_grid.clone();
             // INFO: Restore the value of the drone currently being processed
             // Other drones' locations remain at reduced value
             private_grid.max(private_location.0, private_location.1, 1, &reference_grid);
 
-            // INFO: Solve Action
+            // INFO: Plan Action
             match planner.solve(&private_grid, *private_location) {
                 Some(path) => {
-                    paths.push(path.clone());
+                    paths[index].push(path.clone());
                     path_trace.steps.push_back(path.steps[0].clone());
                     path_trace.total_cost +=
                         global_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
 
-                    // INFO: Solve Result
+                    // INFO: Simulate Result
                     match simulator.solve(&private_grid, &path) {
                         Ok((new_grid, new_location)) => {
                             grid = Ok(new_grid);
@@ -120,8 +120,7 @@ async fn main() {
         }
 
         if log::max_level() >= LevelFilter::Debug {
-            let end_path = paths.last().unwrap().clone();
-            plot_path(&grid.as_ref().unwrap(), &end_path);
+            plot_paths(&grid.as_ref().unwrap(), &paths);
             thread::sleep(Duration::from_millis(100));
         }
     }

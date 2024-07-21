@@ -1,42 +1,38 @@
 use crate::types::{Grid, Path};
 
-pub fn plot_paths(grid: &Grid, paths: &Vec<Path>) {
+pub fn plot_paths(grid: &Grid, paths: &Vec<Vec<Path>>) {
     let mut output = String::new();
     output.push('\n');
 
     for i in 0..grid.size {
         for j in 0..grid.size {
             let value = grid.value_at(i, j);
-            let mut path_index = None;
-            let mut step_index = None;
 
-            for (idx, path) in paths.iter().enumerate() {
-                if let Some(pos) = path.steps.iter().position(|&step| step == (i, j)) {
-                    path_index = Some(idx);
-                    step_index = Some(pos);
-                    break;
-                }
-            }
+            let path_info = paths.iter().enumerate().find_map(|(idx, path)| {
+                path.last().and_then(|first_path| {
+                    first_path.steps.front().and_then(|first_step| {
+                        if first_step == &(i, j) {
+                            Some((idx, 0))
+                        } else {
+                            None
+                        }
+                    })
+                })
+            });
 
-            match (path_index, step_index) {
-                (Some(p_idx), Some(0)) => output.push_str(&format!("[{:X}]", p_idx)),
-                (Some(p_idx), Some(s_idx)) => output.push_str(&format!("[{:X}]", p_idx)),
-                _ => output.push_str(&format!(" {:2} ", value)),
+            match path_info {
+                Some((p_idx, 0)) => output.push_str(&format!("[ X]")),
+                Some((p_idx, _)) => output.push_str(&format!("[ {} ]", p_idx)),
+                None => output.push_str(&format!(" {:2} ", value)),
             }
         }
         output.push('\n');
     }
 
-    output.push_str("Captured Points:\n");
-
-    for (idx, path) in paths.iter().enumerate() {
-        output.push_str(&format!("Path {}: ", idx));
-        for &(i, j) in &path.steps {
-            let value = grid.value_at(i, j);
-            output.push_str(&format!("({},{})={} ", i, j, value));
-        }
-        output.push_str(&format!("Score: {}\n", path.total_cost));
-    }
+    // output.push_str("Captured Points:\n");
+    // for (idx, path) in paths.iter().enumerate() {
+    //     output.push_str(&format!("Score: {}\n", path.total_cost));
+    // }
 
     log::info!("Paths on grid:\n{}", output);
 }
