@@ -21,8 +21,7 @@ pub fn plot_paths(grid: &Grid, paths: &Vec<Vec<Path>>) {
             });
 
             match path_info {
-                Some((p_idx, 0)) => output.push_str(&format!("[ X]")),
-                Some((p_idx, _)) => output.push_str(&format!("[ {} ]", p_idx)),
+                Some((p_idx, _)) => output.push_str(&format!("[X{}]", p_idx)),
                 None => output.push_str(&format!(" {:2} ", value)),
             }
         }

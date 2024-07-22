@@ -42,11 +42,11 @@ async fn main() {
             .as_ref()
             .map(|g| g.clone())
             .expect("Failed to load grid into simulator"),
-        increment_step: 1,
+        increment_step: 0,
     };
 
     // INFO: Prepare
-    let mut paths: Vec<Vec<Path>> = vec![Vec::new(); 5];
+    let mut paths: Vec<Vec<Path>> = vec![Vec::new(); positions.len()];
     let max_steps: usize = cli.time_steps;
     let mut path_trace = Path {
         steps: VecDeque::<(usize, usize)>::new(),
@@ -56,6 +56,7 @@ async fn main() {
     // INFO: Run
     let mut current_step = 0;
     let mut deadline = Deadline::new(cli.max_duration as f32);
+
     loop {
         current_step += 1;
 
@@ -75,8 +76,9 @@ async fn main() {
         log::debug!("Positions: {:?}", positions);
 
         // INFO: Define per-drone configuration
+        let mut private_grid = global_grid.clone();
+        let n_pos = positions.len();
         for (index, private_location) in positions.iter_mut().enumerate() {
-            let mut private_grid = global_grid.clone();
             // INFO: Restore the value of the drone currently being processed
             // Other drones' locations remain at reduced value
             private_grid.max(private_location.0, private_location.1, 1, &reference_grid);
@@ -94,7 +96,12 @@ async fn main() {
                         Ok((new_grid, new_location)) => {
                             // TODO: new grid contains the drop
                             // Grid management needs to improve
-                            grid = Ok(new_grid);
+                            //
+                            if index != n_pos - 1 {
+                                private_grid = new_grid;
+                            } else {
+                                grid = Ok(new_grid);
+                            }
                             *private_location = new_location;
                         }
                         Err(e) => {
@@ -123,7 +130,7 @@ async fn main() {
 
         if log::max_level() >= LevelFilter::Debug {
             plot_paths(&reference_grid, &paths);
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(500));
         }
     }
 
