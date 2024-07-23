@@ -21,6 +21,7 @@ pub struct Cli {
     #[arg(short = 'T', long, default_value = "100")]
     pub max_duration: usize,
 
+    /// Starting positions x
     #[arg(short = 'x', long, value_parser = parse_position, number_of_values = 1, action = clap::ArgAction::Append)]
     pub pos_x: Vec<usize>,
 
