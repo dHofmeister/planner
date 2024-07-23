@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 pub struct Dijkstra {}
 
+// WARNING: Unfinished
 impl Planner for Dijkstra {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = PriorityQueue::new();

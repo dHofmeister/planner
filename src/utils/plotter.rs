@@ -1,8 +1,13 @@
 use crate::types::{Grid, Path};
 use ::std::collections::VecDeque;
-use anyhow::Result;
 use std::usize;
 
+/// Plots the paths on the given grid and logs the result.
+///
+/// # Arguments
+///
+/// * `grid` - The grid on which to plot the paths.
+/// * `paths` - A vector of vectors containing paths for each drone.
 pub fn plot_paths(grid: &Grid, paths: &Vec<Vec<Path>>) {
     let mut output = String::new();
     output.push('\n');
@@ -42,6 +47,17 @@ pub fn plot_paths(grid: &Grid, paths: &Vec<Vec<Path>>) {
     log::info!("Paths on grid:\n{}", output);
 }
 
+/// Creates path traces from the given paths, positions, and final grid.
+///
+/// # Arguments
+///
+/// * `paths` - A vector of vectors containing paths for each drone.
+/// * `positions` - A vector of initial positions for each drone.
+/// * `final_grid` - The final state of the grid.
+///
+/// # Returns
+///
+/// A vector of vectors containing path traces for each drone.
 pub fn create_path_traces(
     paths: &Vec<Vec<Path>>,
     positions: &Vec<(usize, usize)>,
@@ -49,7 +65,7 @@ pub fn create_path_traces(
 ) -> Vec<Vec<Path>> {
     let mut path_traces: Vec<Vec<Path>> = vec![Vec::new(); positions.len()];
 
-    // INFO: Create initial path traces
+    // Create initial path traces
     for (index, path_vector) in paths.iter().enumerate() {
         let mut current_drone_path = Path {
             steps: VecDeque::<(usize, usize)>::new(),
@@ -63,7 +79,7 @@ pub fn create_path_traces(
         path_traces[index] = vec![current_drone_path];
     }
 
-    // INFO: Calculate total cost for each path trace
+    // Calculate total cost for each path trace
     for path_trace in path_traces.iter_mut() {
         let mut total_cost: usize = 0;
         for (x, y) in &path_trace.first().unwrap().steps {
@@ -75,6 +91,11 @@ pub fn create_path_traces(
     path_traces
 }
 
+/// Prints the paths in a human-readable format.
+///
+/// # Arguments
+///
+/// * `paths` - A vector of vectors containing paths for each drone.
 pub fn print_paths(paths: &Vec<Vec<Path>>) {
     for (drone_index, drone_paths) in paths.iter().enumerate() {
         println!("Drone {}:", drone_index);

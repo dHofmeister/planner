@@ -11,6 +11,19 @@ use log::LevelFilter;
 use std::thread;
 use std::time::Duration;
 
+/// Runs a drone simulation based on the provided parameters.
+///
+/// # Arguments
+///
+/// * `cli` - Command line interface arguments
+/// * `planner` - An implementation of the Planner trait
+/// * `simulator` - An implementation of the Simulator trait
+/// * `starting_positions` - Initial positions of the drones
+/// * `starting_grid` - The initial state of the grid
+///
+/// # Returns
+///
+/// A Result containing a vector of paths for each drone, or an error
 pub fn run_drone_simulation(
     cli: Cli,
     planner: impl Planner,
@@ -18,51 +31,48 @@ pub fn run_drone_simulation(
     starting_positions: Vec<(usize, usize)>,
     starting_grid: &Grid,
 ) -> Result<Vec<Vec<Path>>> {
-    // INFO: Prepare
+    // Prepare simulation
     let mut positions = starting_positions.clone();
     let mut paths: Vec<Vec<Path>> = vec![Vec::new(); positions.len()];
     let mut grid: Result<Grid> = Ok(starting_grid.clone());
     let max_steps: usize = cli.time_steps;
 
-    // INFO: Run
+    // Run simulation
     let mut current_step = 0;
     let mut deadline = Deadline::new(cli.max_duration as f32);
 
     loop {
         current_step += 1;
 
-        // INFO: Prepare Grid
+        // Prepare Grid
         let mut global_grid = match grid.as_mut() {
             Ok(g) => g.clone(),
             Err(_) => return Ok(paths),
         };
 
-        // TODO: Reduce clones, better track grid preperation
         let reference_grid = global_grid.clone();
         for pos in &positions {
-            // INFO: Reduce the value of the grid nearby drones
             global_grid.saturated_subtract_at(pos.0, pos.1, 2, 5);
         }
 
         log::debug!("Grid: \n {:?}", global_grid);
         log::debug!("Positions: {:?}", positions);
 
-        // INFO: Define per-drone configuration
+        // Define per-drone configuration
         let mut private_grid = global_grid.clone();
         let n_pos = positions.len();
         for (index, private_location) in positions.iter_mut().enumerate() {
-            // INFO: Restore the value of the drone currently being processed
-            // Other drones' locations remain at reduced value
             private_grid.max(private_location.0, private_location.1, 1, &reference_grid);
 
-            // INFO: Plan Action
-            // WARNING: Current planners are not immune to multi drone convergence and stacking
+            // Plan Action
+            // WARNING: Current algorithm is not fully resistant to drone convergence and
+            // collapse
             match planner.solve(&private_grid, *private_location) {
                 Some(path) => {
                     paths[index].push(path.clone());
 
-                    // INFO: Simulate Result
-                    // FIX: Current simulator increments for every drone, not for every loop
+                    // Simulate Result
+                    // BUG: Simulator will increment n_drones times in 1 iteration
                     match simulator.solve(&private_grid, &path) {
                         Ok((new_grid, new_location)) => {
                             if index != n_pos - 1 {
@@ -98,7 +108,6 @@ pub fn run_drone_simulation(
         deadline.tick();
         if deadline.will_exceed_deadline() {
             log::info!("Terminating due to deadline");
-
             return Ok(paths);
         }
     }

@@ -5,6 +5,7 @@ use std::collections::{HashMap, VecDeque};
 
 pub struct BFS {}
 
+// WARNING: Unused / Stale
 impl Planner for BFS {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = VecDeque::new();

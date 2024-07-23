@@ -4,10 +4,12 @@ use std::collections::VecDeque;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-// INFO: Path
+/// Represents a path with steps and total cost.
 #[derive(Clone)]
 pub struct Path {
+    /// The sequence of steps in the path, represented as (x, y) coordinates.
     pub steps: VecDeque<(usize, usize)>,
+    /// The total cost of the path.
     pub total_cost: usize,
 }
 
@@ -21,12 +23,16 @@ impl fmt::Display for Path {
     }
 }
 
-// INFO: Node
+/// Represents a node in a grid.
 #[derive(Clone)]
 pub struct Node {
+    /// The row of the node in the grid.
     pub row: usize,
+    /// The column of the node in the grid.
     pub col: usize,
+    /// The value of the node.
     pub value: usize,
+    /// The parent node's coordinates, if any.
     pub parent: Option<(usize, usize)>,
 }
 
@@ -44,23 +50,28 @@ impl Hash for Node {
 
 impl Eq for Node {}
 
-// INFO: Grid
+/// Represents a grid of values.
 #[derive(Clone)]
 pub struct Grid {
+    /// The raw data of the grid, stored as a vector of u8.
     pub data: Vec<u8>,
+    /// The size of the grid (assuming it's square).
     pub size: usize,
 }
 
 impl Grid {
+    /// Creates a new Grid from a vector of u8 values.
     pub fn new(data: Vec<u8>) -> Self {
         let size = (data.len() as f64).sqrt() as usize;
         Grid { data, size }
     }
 
+    /// Returns the value at the specified row and column.
     pub fn value_at(&self, row: usize, col: usize) -> u8 {
         self.data[row * self.size + col]
     }
 
+    /// Subtracts a value from a range of cells around a specified point, using saturation arithmetic.
     pub fn saturated_subtract_at(&mut self, row: usize, col: usize, range: usize, amount: usize) {
         let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
         for r in start_row..end_row {
@@ -71,6 +82,7 @@ impl Grid {
         }
     }
 
+    /// Adds a value to a range of cells around a specified point, using saturation arithmetic.
     pub fn saturated_add_at(&mut self, row: usize, col: usize, range: usize, amount: usize) {
         let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
         for r in start_row..end_row {
@@ -81,6 +93,7 @@ impl Grid {
         }
     }
 
+    /// Helper function to get the start and end indices for row and column operations.
     fn get_start_end_row_col(
         &self,
         row: usize,
@@ -95,6 +108,7 @@ impl Grid {
         (start_row, end_row, start_col, end_col)
     }
 
+    /// Loads a predefined grid based on the provided grid name.
     pub fn load(grid_name: &str) -> Result<Self> {
         let grid_file = match grid_name {
             "GRID_S" => GRID_S,
@@ -118,6 +132,7 @@ impl Grid {
         Ok(grid)
     }
 
+    /// Updates the current grid with maximum values from a source grid within a specified range.
     pub fn max(&mut self, row: usize, col: usize, range: usize, source_grid: &Grid) {
         let (start_row, end_row, start_col, end_col) = self.get_start_end_row_col(row, col, range);
         for r in start_row..end_row {

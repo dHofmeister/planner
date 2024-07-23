@@ -13,12 +13,10 @@ use clap::Parser;
 // TODO: List of todos:
 // --docs
 // --bench
-// --test
 
 #[tokio::main]
 async fn main() {
     // INFO: Initialize
-
     // NOTE: Run in RUST_LOG=DEBUG for visualisations, RUST_LOG=INFO for results-only output
     env_logger::init();
     log::info!("starting up");

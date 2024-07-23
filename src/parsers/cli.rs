@@ -1,6 +1,6 @@
 use clap::Parser;
 
-// Avalor A.I. Grid Planner
+/// CLI Parser to configure the planner
 #[derive(Parser)]
 #[command(
     author = "Deniz Hofmeister",

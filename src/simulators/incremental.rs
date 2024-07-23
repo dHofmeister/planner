@@ -2,12 +2,25 @@ pub use crate::traits::Simulator;
 pub use crate::types::{Grid, Path};
 use anyhow::Result;
 
+/// A simulator that incrementally recovers grid values.
 pub struct Incremental {
+    /// The step size for incrementing grid values.
     pub increment_step: u8,
+    /// The initial grid state.
     pub start_grid: Grid,
 }
 
 impl Simulator for Incremental {
+    /// Simulates one step of the path on the given grid.
+    ///
+    /// # Arguments
+    ///
+    /// * `grid` - The current state of the grid.
+    /// * `path` - The path to simulate.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the updated grid and the next position, or an error.
     fn solve(&self, grid: &Grid, path: &Path) -> Result<(Grid, (usize, usize))> {
         let (x, y) = path.steps[0];
         let mut out_grid = grid.clone();
@@ -19,7 +32,11 @@ impl Simulator for Incremental {
 }
 
 impl Incremental {
-    // INFO: Incrementally recovers the grid to its original values
+    /// Incrementally recovers the grid to its original values.
+    ///
+    /// # Arguments
+    ///
+    /// * `b` - The grid data to recover.
     fn recover(&self, b: &mut Vec<u8>) {
         b.iter_mut()
             .zip(self.start_grid.data.iter())
@@ -37,6 +54,7 @@ mod tests {
     use crate::traits::Simulator;
     use crate::types::{Grid, Path};
 
+    /// Tests the incremental solve function.
     #[test]
     fn test_incremental_solve() {
         let start_grid = Grid::load("GRID_S").unwrap();

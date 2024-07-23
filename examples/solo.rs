@@ -10,12 +10,6 @@ use planner::config::grids::*;
 
 use clap::Parser;
 
-// TODO: List of todos:
-// --example
-// --docs
-// --bench
-// --test
-
 #[tokio::main]
 pub async fn main() {
     // INFO: Initialize
