@@ -3,14 +3,13 @@ use planner::planners;
 use planner::simulators;
 use planner::traits::{Simulator, Solver};
 use planner::types::{Grid, Path};
-use planner::utils::{plot_paths, Deadline};
+use planner::utils::{create_path_traces, plot_paths, print_paths, Deadline};
 
 #[allow(unused_imports)]
 use planner::config::grids::*;
 
 use anyhow::Result;
 use clap::Parser;
-use std::collections::VecDeque;
 use std::thread;
 use std::time::Duration;
 
@@ -25,6 +24,8 @@ use log::LevelFilter;
 #[tokio::main]
 async fn main() {
     // INFO: Initialize
+
+    // NOTE: Run in RUST_LOG=DEBUG for visualisations, RUST_LOG=INFO for results-only output
     env_logger::init();
     log::info!("starting up");
     let cli = Cli::parse();
@@ -35,7 +36,7 @@ async fn main() {
 
     let planner = planners::RayCasting {
         len: cli.size,
-        rays: 8,
+        rays: 16,
     };
     let simulator = simulators::Incremental {
         start_grid: grid
@@ -48,10 +49,6 @@ async fn main() {
     // INFO: Prepare
     let mut paths: Vec<Vec<Path>> = vec![Vec::new(); positions.len()];
     let max_steps: usize = cli.time_steps;
-    let mut path_trace = Path {
-        steps: VecDeque::<(usize, usize)>::new(),
-        total_cost: 0,
-    };
 
     // INFO: Run
     let mut current_step = 0;
@@ -66,6 +63,7 @@ async fn main() {
             Err(_) => break,
         };
 
+        // TODO: Reduce clones, better track grid preperation
         let reference_grid = global_grid.clone();
         for pos in &positions {
             // INFO: Reduce the value of the grid nearby drones
@@ -84,18 +82,15 @@ async fn main() {
             private_grid.max(private_location.0, private_location.1, 1, &reference_grid);
 
             // INFO: Plan Action
+            // WARNING: Current planners are not immune to multi drone convergence and stacking
             match planner.solve(&private_grid, *private_location) {
                 Some(path) => {
                     paths[index].push(path.clone());
-                    path_trace.steps.push_back(path.steps[0].clone());
-                    path_trace.total_cost +=
-                        global_grid.value_at(path.steps[0].0, path.steps[0].1) as usize;
 
                     // INFO: Simulate Result
+                    // FIX: Current simulator increments for every drone, not for every loop
                     match simulator.solve(&private_grid, &path) {
                         Ok((new_grid, new_location)) => {
-                            // TODO: new grid contains the drop
-                            // Grid management needs to improve
                             if index != n_pos - 1 {
                                 private_grid = new_grid;
                             } else {
@@ -134,10 +129,14 @@ async fn main() {
     }
 
     // INFO: End
-    // let final_grid = Grid::load(&cli.grid);
-    // if !path_trace.steps.is_empty() && final_grid.is_ok() {
-    //     plot_paths(&final_grid.unwrap(), &path_trace);
-    // } else {
-    //     log::debug!("No path found");
-    // }
+    // Aggregate the results and format them for printing
+    let final_grid = Grid::load(&cli.grid);
+    let path_traces = create_path_traces(&paths, &positions, &final_grid);
+
+    if !path_traces.is_empty() && final_grid.is_ok() {
+        plot_paths(&final_grid.unwrap(), &path_traces);
+        print_paths(&path_traces);
+    } else {
+        log::debug!("No path found");
+    }
 }
