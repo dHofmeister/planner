@@ -1,4 +1,7 @@
 # Planner
+
+[![Rust](https://github.com/dHofmeister/planner/actions/workflows/rust.yml/badge.svg)](https://github.com/dHofmeister/planner/actions/workflows/rust.yml)
+
 ## Documentation 
 
 This project aims to solve a planning problem in which the goal is to navigate a grid and collect as many points as possible. Side goals are doing this in a computationally efficient manner and allowing a multi-agent system to traverse the grid. The project contains examples, tests and docs.
