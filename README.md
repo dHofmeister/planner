@@ -1,6 +1,6 @@
 # Planner
 
-[![Rust](https://github.com/dHofmeister/planner/actions/workflows/rust.yml/badge.svg)](https://github.com/dHofmeister/planner/actions/workflows/rust.yml)
+[![Tests](https://github.com/dHofmeister/planner/actions/workflows/rust.yml/badge.svg)](https://github.com/dHofmeister/planner/actions/workflows/rust.yml)
 
 ## Documentation 
 
