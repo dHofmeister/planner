@@ -1,11 +1,11 @@
-use crate::traits::Solver;
+use crate::traits::Planner;
 use crate::types::Node;
 use crate::types::{Grid, Path};
 use std::collections::{HashMap, VecDeque};
 
 pub struct BFS {}
 
-impl Solver for BFS {
+impl Planner for BFS {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = VecDeque::new();
         let mut visited = vec![false; grid.size * grid.size];

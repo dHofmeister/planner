@@ -30,3 +30,36 @@ impl Incremental {
             });
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::traits::Simulator;
+    use crate::types::{Grid, Path};
+
+    #[test]
+    fn test_incremental_solve() {
+        let start_grid = Grid::load("GRID_S").unwrap();
+        let incremental = Incremental {
+            increment_step: 1,
+            start_grid: start_grid.clone(),
+        };
+
+        let mut steps = std::collections::VecDeque::new();
+        steps.push_back((0, 0));
+        steps.push_back((1, 1));
+        let path = Path {
+            steps,
+            total_cost: 0,
+        };
+
+        let result = incremental.solve(&start_grid, &path);
+
+        assert!(result.is_ok());
+
+        if let Ok((out_grid, new_pos)) = result {
+            assert_eq!(new_pos, (1, 1));
+            assert_eq!(out_grid.value_at(0, 0), 0);
+        }
+    }
+}

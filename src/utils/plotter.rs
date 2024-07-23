@@ -45,7 +45,7 @@ pub fn plot_paths(grid: &Grid, paths: &Vec<Vec<Path>>) {
 pub fn create_path_traces(
     paths: &Vec<Vec<Path>>,
     positions: &Vec<(usize, usize)>,
-    final_grid: &Result<Grid>,
+    final_grid: &Grid,
 ) -> Vec<Vec<Path>> {
     let mut path_traces: Vec<Vec<Path>> = vec![Vec::new(); positions.len()];
 
@@ -67,7 +67,7 @@ pub fn create_path_traces(
     for path_trace in path_traces.iter_mut() {
         let mut total_cost: usize = 0;
         for (x, y) in &path_trace.first().unwrap().steps {
-            total_cost += final_grid.as_ref().unwrap().value_at(*x, *y) as usize;
+            total_cost += final_grid.value_at(*x, *y) as usize;
         }
         path_trace.first_mut().unwrap().total_cost = total_cost;
     }

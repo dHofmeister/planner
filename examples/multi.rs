@@ -11,18 +11,26 @@ use planner::config::grids::*;
 use clap::Parser;
 
 // TODO: List of todos:
+// --example
 // --docs
 // --bench
 // --test
 
 #[tokio::main]
-async fn main() {
+pub async fn main() {
     // INFO: Initialize
 
     // NOTE: Run in RUST_LOG=DEBUG for visualisations, RUST_LOG=INFO for results-only output
     env_logger::init();
     log::info!("starting up");
-    let cli = Cli::parse();
+    let mut cli = Cli::parse();
+
+    // INFO: Overwriting for demo
+    cli.max_duration = 3000;
+    cli.size = 9;
+    cli.time_steps = 128;
+    cli.pos_x = vec![3, 8, 12];
+    cli.pos_y = vec![7, 1, 3];
 
     // INFO: Starting Configuration
     let x = cli.pos_x.clone();
@@ -32,7 +40,7 @@ async fn main() {
 
     let planner = planners::RayCasting {
         len: cli.size,
-        rays: 16,
+        rays: 8,
     };
     let simulator = simulators::Incremental {
         start_grid: grid.clone(),

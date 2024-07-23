@@ -11,3 +11,11 @@ anyhow = "1"
 priority-queue = "2"
 bresenham = "0"
 clap = { version = "4", features = ["derive"] }
+
+[[example]]
+name = "solo"
+path = "examples/solo.rs"
+
+[[example]]
+name = "multi"
+path = "examples/multi.rs"

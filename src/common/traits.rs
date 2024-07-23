@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::types::{Grid, Path};
 
-pub trait Solver {
+pub trait Planner {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path>;
 }
 

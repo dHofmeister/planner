@@ -1,4 +1,4 @@
-use crate::traits::Solver;
+use crate::traits::Planner;
 use crate::types::{Grid, Path};
 use bresenham::Bresenham;
 use std::f32;
@@ -9,7 +9,7 @@ pub struct RayCasting {
     pub rays: usize,
 }
 
-impl Solver for RayCasting {
+impl Planner for RayCasting {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let d_angle: f32 = 2.0 * consts::PI / self.rays as f32;
         let mut angles = Vec::<f32>::with_capacity(self.rays);
@@ -63,5 +63,28 @@ impl Solver for RayCasting {
             }
         }
         best_path
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ray_casting_planner() {
+        let planner = RayCasting { len: 3, rays: 8 };
+
+        let grid = Grid::load("GRID_S").expect("Could not load grid");
+
+        let start_pos = (1, 1);
+        let path = planner.solve(&grid, start_pos);
+
+        assert!(path.is_some(), "Planner should find a path");
+
+        if let Some(path) = path {
+            assert!(!path.steps.is_empty(), "Path should have at least one step");
+
+            assert!(path.steps.len() <= 3, "Path should not exceed ray len");
+        }
     }
 }

@@ -1,4 +1,4 @@
-use crate::traits::Solver;
+use crate::traits::Planner;
 use crate::types::Node;
 use crate::types::{Grid, Path};
 use priority_queue::PriorityQueue;
@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 pub struct Dijkstra {}
 
-impl Solver for Dijkstra {
+impl Planner for Dijkstra {
     fn solve(&self, grid: &Grid, start: (usize, usize)) -> Option<Path> {
         let mut queue = PriorityQueue::new();
         let node = Node {

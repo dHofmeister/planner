@@ -2,6 +2,7 @@ pub mod common;
 pub mod config;
 pub mod parsers;
 pub mod planners;
+pub mod run;
 pub mod simulators;
 pub mod utils;
 
