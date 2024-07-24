@@ -10,7 +10,7 @@ This project aims to solve a planning problem in which the goal is to navigate a
 
 The path planning problem in its most basic form is a solved problem. Solutions exist in the form of Breadth First Search, Dijkstra, A* and D*. However, there are multiple sources of added complexity that make such solutions potentially less ideal or complicated. 1) Non-static grid. 2) Multi-agent system. 3) No clearly defined end-goal. The combination of 1 and 3 allow backtracking and "running in circles" to be perfectly valid solutions. Combine this with a multi-drone problem and solutions are not instantly obvious.
 
-To handle this problem I decided to implement the most straight-forward algorithm that is intuitively easy so follow: Raycasting. Each drones shoots rays on the grid from its own location and counts how many points it hits. It selects the direction to go where it has hit the most points.
+To handle this problem I decided to implement the most straight-forward algorithm that is intuitively easy to follow: Raycasting. Each drones shoots rays on the grid from its own location and counts how many points it hits. It selects the direction to go where it has hit the most points.
 
 This solution is both simple and easy to tune / upgrade. Ray length, test direction, conic raycasting, falloff... are potential additions. The current implements 8 rays, and a configurable length.
 
